@@ -1,8 +1,6 @@
 const AdBlockDetector = {
     detected: null,
 
-    testBlock: null,
-
     isBlocked: function() {
         return AdBlockDetector.detect(function() {return true}, function() {return false});
     },
@@ -30,7 +28,7 @@ const AdBlockDetector = {
     },
 
     setDetected: function(detectedCallback, undetectedCallback) {
-        let testBlock = document.createElement('div');
+        var testBlock = document.createElement('div');
         testBlock.innerHTML = '&nbsp';
         testBlock.className = 'adsbox';
         document.body.appendChild(testBlock);
