@@ -1,46 +1,64 @@
-const AdBlockDetector = {
-    detected: null,
+AdBlockDetector = (function() {
+    detected = null;
 
-    isBlocked: function() {
-        return AdBlockDetector.detect(function() {return true}, function() {return false});
-    },
+    function publicIsBlocked() {
+        return publicDetect(function() {return true}, function() {return false});
+    }
 
-    detect: function(detectedCallback, undetectedCallback) {
+    function publicDetect(detectedCallback, undetectedCallback) {
+        detectedCallback = privateSetDetectedCallback(detectedCallback);
+
+        undetectedCallback = privateSetUndetectedCallback(undetectedCallback);
+
+        if ( detected === null ) {
+            return privateSetDetected(detectedCallback, undetectedCallback);
+        } else if ( detected ) {
+            return detectedCallback();
+        } else if ( ! detected ) {
+            return undetectedCallback();
+        }
+    }
+
+    function privateSetDetected(detectedCallback, undetectedCallback) {
+        testBlock = document.createElement('div');
+        testBlock.innerHTML = '&nbsp';
+        testBlock.className = 'adsbox';
+        testBlock.id = Math.random().toString(36).substring(3);
+        document.body.appendChild(testBlock);
+
+        if ( testBlock.offsetHeight === 0 ) {
+            detected = true;
+            document.getElementById(testBlock.id).remove();
+            return detectedCallback();
+        } else {
+            detected = false;
+            document.getElementById(testBlock.id).remove();
+            return undetectedCallback();
+        }
+    }
+    
+    function privateSetDetectedCallback(detectedCallback) {
         if ( typeof detectedCallback === 'undefined' ) {
             detectedCallback = function () {
                 console.log('Ad block detected');
             }
         }
 
+        return detectedCallback;
+    }
+
+    function privateSetUndetectedCallback(undetectedCallback) {
         if ( typeof undetectedCallback === 'undefined' ) {
             undetectedCallback = function () {
                 console.log('Ad block undetected');
             }
         }
 
-        if ( AdBlockDetector.detected === null ) {
-            return AdBlockDetector.setDetected(detectedCallback, undetectedCallback);
-        } else if ( AdBlockDetector.detected ) {
-            return detectedCallback();
-        } else if ( ! AdBlockDetector.detected ) {
-            return undetectedCallback();
-        }
-    },
-
-    setDetected: function(detectedCallback, undetectedCallback) {
-        var testBlock = document.createElement('div');
-        testBlock.innerHTML = '&nbsp';
-        testBlock.className = 'adsbox';
-        document.body.appendChild(testBlock);
-
-        if ( testBlock.offsetHeight === 0 ) {
-            testBlockdetected = true;
-            testBlock.remove();
-            return detectedCallback();
-        } else {
-            testBlockdetected = false;
-            testBlock.remove();
-            return undetectedCallback();
-        }
+        return undetectedCallback;
     }
-};
+
+    return {
+        detect: publicDetect,
+        isBlocked: publicIsBlocked
+    }
+})();
