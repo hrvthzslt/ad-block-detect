@@ -26,13 +26,13 @@ AdBlockDetector = (function() {
         testBlock.id = Math.random().toString(36).substring(3);
         document.body.appendChild(testBlock);
 
-        if ( testBlock.offsetHeight === 0 ) {
-            detected = true;
-            document.getElementById(testBlock.id).remove();
+        detected = testBlock.offsetHeight === 0;
+
+        document.getElementById(testBlock.id).remove();
+
+        if ( detected ) {
             return detectedCallback();
         } else {
-            detected = false;
-            document.getElementById(testBlock.id).remove();
             return undetectedCallback();
         }
     }
